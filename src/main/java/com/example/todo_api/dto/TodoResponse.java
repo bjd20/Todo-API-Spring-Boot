@@ -5,6 +5,7 @@ public class TodoResponse {
     private String title;
     private boolean completed;
     private String createdAt;
+    private String description;
 
     public Long getId() {
         return id;
@@ -36,5 +37,13 @@ public class TodoResponse {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

@@ -14,6 +14,9 @@ public class TodoUpdateRequest {
         return title;
     }
 
+    @Size(max = 500)
+    private String description;
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -24,5 +27,13 @@ public class TodoUpdateRequest {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

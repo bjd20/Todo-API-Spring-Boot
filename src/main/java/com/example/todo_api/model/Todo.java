@@ -1,23 +1,58 @@
 package com.example.todo_api.model;
 
 
-//****************************- ENTITIES/DTO -***************************************
+//****************************- ENTITIES -***************************************
 
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+
+// annotate to act as JPA entity.
+@Entity
+@Table(name = "todos")
 public class Todo {
+
+    @Id     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false,length = 100)
     private String title;
+
+    @Column(name = "is_completed")
     private boolean completed;
-    private String createdAt;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(length = 500)
+    private String description;
 
     // Default Constructor (required)
-    public Todo() {}
+    public Todo() {
+        this.createdAt = LocalDateTime.now();
+        this.completed = false;
+    }
 
-    // Constructor for easy creation
-    public Todo(Long id, String title, boolean completed, String createdAt) {
+    // Constructors for convenience
+    public Todo(String title) {
+        this();
+        this.title = title;
+    }
+
+    public Todo(String title, String description) {
+        this();
+        this.title = title;
+        this.description = description;
+    }
+
+    // Constructor for detailed creation
+    public Todo(Long id, String title, boolean completed, LocalDateTime createdAt, String description) {
         this.id = id;
         this.title = title;
         this.completed = completed;
         this.createdAt = createdAt;
+        this.description = description;
     }
 
     // Getters and Setters (Spring uses these for JSON)
@@ -46,11 +81,19 @@ public class Todo {
         this.completed = completed;
     }
 
-    public String getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

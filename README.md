@@ -11,3 +11,16 @@
   * Validations(@Valid, @NotNull, @Size).
   * Global exception handling using @ControllerAdvice.
 * Clean structure: controller → service → repository(in-memory).
+
+
+## COMMIT 2:
+
+###   PostgreSQL + Spring Data JPA
+* Replace the in-memory TodoRepository with the Spring Data JPA talking to a real PostgreSQL database.
+* Dependencies of 'starter-jpa' and 'postgresql' added in build.gradle.
+* application.properties: Database Configuration and JPA is setup.
+* JPA Entity mapping (@Entity, @Id, @GeneratedValue).
+* Spring Data JPA repositories (extending JpaRepository).
+* Configuring DB connection in Spring Boot.
+* Existing controller/service/DTO layers stay almost unchanged.
+* New field added 'description'.

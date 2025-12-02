@@ -21,26 +21,31 @@ public class TodoService {
     }
 
     public List<TodoResponse> getAllTodos() {
-        return toResponseList(todoRepository.findAll());
+        return todoRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     public Optional<TodoResponse> getTodoById(Long id) {
-        return todoRepository.findById(id).map(this::toResponse);
+        return todoRepository.findById(id)
+                .map(this::toResponse);
     }
 
     public TodoResponse createTodo(TodoCreateRequest createRequest) {
-        Todo todo = new Todo();
-        todo.setTitle(createRequest.getTitle());
-        todo.setCompleted(false);
+        Todo todo = new Todo(createRequest.getTitle(), createRequest.getDescription());
         Todo saved = todoRepository.save(todo);
         return toResponse(saved);
     }
 
+
+    //    Request -> Entity
     public TodoResponse updateTodo(Long id, TodoUpdateRequest updateRequest) {
         Todo updated =  todoRepository.findById(id)
                 .map(todo -> {
                     todo.setTitle(updateRequest.getTitle());
                     todo.setCompleted(updateRequest.isCompleted());
+                    todo.setDescription(updateRequest.getDescription());
                     return todoRepository.save(todo);
                 })
                 .orElseThrow(() -> new RuntimeException("Todo not found: " + id));
@@ -48,20 +53,26 @@ public class TodoService {
         return toResponse(updated);
     }
 
-    public boolean deleteTodo(Long id){
-        return todoRepository.deleteById(id);
+    public void deleteTodo(Long id){
+        if(!todoRepository.existsById(id)){
+            throw new RuntimeException("Todo not found: " + id);
+        }
+        todoRepository.deleteById(id);
     }
 
-//    Simple Mapper Methods for Model->DTO
+//    Simple Mapper Methods for Model -> DTO response
 
+    //    Entity -> Response
     private TodoResponse toResponse(Todo todo) {
         TodoResponse res = new TodoResponse();
         res.setId(todo.getId());
         res.setTitle(todo.getTitle());
         res.setCompleted(todo.isCompleted());
-        res.setCreatedAt(todo.getCreatedAt());
+        res.setCreatedAt(todo.getCreatedAt().toString());
+        res.setDescription(todo.getDescription());
         return res;
     }
+
 
     private List<TodoResponse> toResponseList(List<Todo> todos) {
         return todos.stream()
