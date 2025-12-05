@@ -12,6 +12,7 @@
   * Global exception handling using @ControllerAdvice.
 * Clean structure: controller → service → repository(in-memory).
 
+---
 
 ## COMMIT 2:
 
@@ -24,3 +25,38 @@
 * Configuring DB connection in Spring Boot.
 * Existing controller/service/DTO layers stay almost unchanged.
 * New field added 'description'.
+
+---
+
+## COMMIT 3:
+
+### Multi-User + Authentication(JWT)
+* User JPA entity and DTOs for User requests and responses.
+* JPA relationships: One-to-Many (User ↔ Todo).
+* Spring Security fundamentals and configuration.
+* JWT (JSON Web Tokens) for stateless authentication.
+* Basic role-based access control (RBAC).
+* Unit and integration tests using JUnit 5 and Mockito.
+
+
+```
+Single Todo List          →         Multi-User
+──────────────────────────────────────────────────
+
+API Endpoint                       HTTP Request
+    ↓                                 ↓
+TodoController                  Authentication Filter (JWT)
+    ↓                                 ↓
+TodoService                     User extracted from token
+    ↓                                 ↓
+TodoRepository                  UserContext / SecurityContext
+    ↓                                 ↓
+Todo (no user)          →    Todo (belongs to User)
+                                    ↓
+                        User filters todos by user_id
+                                    ↓
+                        Only authorized user can see/edit
+```
+**Insight**: Every todo now belongs to a user. Security layer sits at the HTTP boundary.
+
+---

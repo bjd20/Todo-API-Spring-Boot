@@ -16,7 +16,7 @@ public class Todo {
     @Id     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false,length = 100)
+    @Column(nullable = false, length = 100)
     private String title;
 
     @Column(name = "is_completed")
@@ -27,6 +27,11 @@ public class Todo {
 
     @Column(length = 500)
     private String description;
+
+    // Relationship: many todos belong to one user
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     // Default Constructor (required)
     public Todo() {
@@ -40,11 +45,6 @@ public class Todo {
         this.title = title;
     }
 
-    public Todo(String title, String description) {
-        this();
-        this.title = title;
-        this.description = description;
-    }
 
     // Constructor for detailed creation
     public Todo(Long id, String title, boolean completed, LocalDateTime createdAt, String description) {
@@ -95,5 +95,13 @@ public class Todo {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

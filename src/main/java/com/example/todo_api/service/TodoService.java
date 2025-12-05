@@ -4,36 +4,57 @@ import com.example.todo_api.dto.TodoCreateRequest;
 import com.example.todo_api.dto.TodoResponse;
 import com.example.todo_api.dto.TodoUpdateRequest;
 import com.example.todo_api.model.Todo;
+import com.example.todo_api.model.User;
 import com.example.todo_api.repository.TodoRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 //****************************- Service Layer -***************************************
 
 @Service       //'Service' Annotation helps the TodoController's constructor to get a bean of the TodoService. // Spring creates this bean automatically
 public class TodoService {
-    private final TodoRepository todoRepository;
 
-    public TodoService(TodoRepository todoRepository) {
+    private final TodoRepository todoRepository;
+    private final AuthService authService;
+
+
+    public TodoService(TodoRepository todoRepository, AuthService authService) {
         this.todoRepository = todoRepository;
+        this.authService = authService;
     }
 
+    // getTodos filtered by user
     public List<TodoResponse> getAllTodos() {
+        User currrentUser = getCurrentUser();
+
         return todoRepository.findAll()
                 .stream()
+                .filter(t -> t.getUser().getId().equals(currrentUser.getId()))
                 .map(this::toResponse)
                 .toList();
     }
 
-    public Optional<TodoResponse> getTodoById(Long id) {
-        return todoRepository.findById(id)
-                .map(this::toResponse);
+    public TodoResponse getTodoById(Long id) {
+        User currentUser = getCurrentUser();
+
+        Todo todo =  todoRepository.findById(id)
+                .filter(t -> t.getUser().getId().equals(currentUser.getId()))
+                .orElseThrow(() -> new RuntimeException("Invalid todo_id for the user_" + currentUser.getId()));
+
+        return toResponse(todo);
     }
 
+
     public TodoResponse createTodo(TodoCreateRequest createRequest) {
-        Todo todo = new Todo(createRequest.getTitle(), createRequest.getDescription());
+        User currrentUser = getCurrentUser();
+
+        Todo todo = new Todo(createRequest.getTitle());
+        todo.setDescription(createRequest.getDescription());
+        todo.setUser(currrentUser);
+
         Todo saved = todoRepository.save(todo);
         return toResponse(saved);
     }
@@ -41,7 +62,10 @@ public class TodoService {
 
     //    Request -> Entity
     public TodoResponse updateTodo(Long id, TodoUpdateRequest updateRequest) {
+        User currentUser = getCurrentUser();
+
         Todo updated =  todoRepository.findById(id)
+                .filter(t -> t.getUser().getId().equals(currentUser.getId()))
                 .map(todo -> {
                     todo.setTitle(updateRequest.getTitle());
                     todo.setCompleted(updateRequest.isCompleted());
@@ -53,10 +77,15 @@ public class TodoService {
         return toResponse(updated);
     }
 
+    // Delete Todos by id and filtered by user.
     public void deleteTodo(Long id){
-        if(!todoRepository.existsById(id)){
-            throw new RuntimeException("Todo not found: " + id);
-        }
+
+        User currentUser = getCurrentUser();
+
+        Todo todo = todoRepository.findById(id)
+                .filter(t -> t.getUser().getId().equals(currentUser.getId()))
+                .orElseThrow(() -> new RuntimeException("Invalid todo_id"));
+
         todoRepository.deleteById(id);
     }
 
@@ -78,5 +107,19 @@ public class TodoService {
         return todos.stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+
+    // Helper to get current user
+    private String getCurrentUsername() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()) {
+            return (String) auth.getPrincipal();
+        }
+        throw new RuntimeException("User not authenticated");
+    }
+
+    private User getCurrentUser() {
+        return authService.findByUsername(getCurrentUsername());
     }
 }

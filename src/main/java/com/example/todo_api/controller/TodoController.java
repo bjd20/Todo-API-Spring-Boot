@@ -30,9 +30,8 @@ public class TodoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TodoResponse> getTodoById(@PathVariable Long id){
-        return todoService.getTodoById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+
+        return ResponseEntity.ok(todoService.getTodoById(id));
     }
 
     @PostMapping
